@@ -1,9 +1,0 @@
-Steps to start work:
-1. Open MongoDB Compass and connect to the server
-2. Open VS Code and connect to server from the IDE itself -> mongodb://localhost:27017
-3. Open command prompt or Windows Powershell terminal and type mongosh to connect to the server
-
-Additional: 
-In oder to execute a certain file simply open a terminal from VS Code (View -> Terminal) and type 
-mongosh .\database\<filename>.js then you can check the database using the mongosh from CMD or Powershell 
-or using the MongoDB Compass tool.
