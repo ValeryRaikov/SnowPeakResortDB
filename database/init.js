@@ -1,10 +1,124 @@
-db.dropDatabase("SnowPeakResortDB") // clear existing data if any
-
 // use SnowPeakResortDB
 
 // This line is necessary for mongosh scripts to avoid issues with `use` command
 // It allows the script to run without needing to switch databases manually
 db = db.getSiblingDB("SnowPeakResortDB")
+
+db.dropDatabase() // clear existing data if any
+
+// SCHEAM VALIDATORS
+db.createCollection("users", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["name", "role", "active"],
+      properties: {
+        name: {
+          bsonType: "string",
+          description: "User name must be a string"
+        },
+        email: {
+          bsonType: "string",
+          pattern: "^.+@.+\\..+$",
+          description: "Must be a valid email"
+        },
+        role: {
+          enum: ["tourist", "instructor", "technician"],
+          description: "Allowed roles"
+        },
+        skillLevel: {
+          enum: ["beginner", "intermediate", "advanced", "expert", null]
+        },
+        registeredAt: {
+          bsonType: "date"
+        },
+        active: {
+          bsonType: "bool"
+        }
+      }
+    }
+  }
+});
+
+db.createCollection("lifts", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["name", "type", "status"],
+      properties: {
+
+        name: {
+          bsonType: "string",
+          description: "Lift name must be a string"
+        },
+
+        type: {
+          enum: ["chairlift", "gondola", "ski tow"],
+          description: "Lift type must be chairlift, gondola, or ski tow"
+        },
+
+        capacityPerHr: {
+          bsonType: ["int", "double", "null"],
+          minimum: 100,
+          description: "Capacity must be a positive number"
+        },
+
+        status: {
+          enum: ["active", "inactive", "maintenance"],
+          description: "Lift must have a valid operational status"
+        },
+
+        maintenance: {
+          bsonType: "array",
+          items: {
+            bsonType: "string"
+          },
+          description: "Maintenance history must be an array"
+        }
+      }
+    }
+  }
+});
+
+db.createCollection("slopes", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["name", "difficulty", "status"],
+      properties: {
+
+        name: {
+          bsonType: "string",
+          description: "Slope name must be a string"
+        },
+
+        difficulty: {
+          enum: ["green", "blue", "red", "black"],
+          description: "Difficulty must be green, blue, red or black"
+        },
+
+        lengthKm: {
+          bsonType: ["double", "int", "null"],
+          minimum: 0.1,
+          description: "Slope length must be positive"
+        },
+
+        status: {
+          enum: ["open", "closed"],
+          description: "Slope status must be open or closed"
+        },
+
+        incidents: {
+          bsonType: "array",
+          items: {
+            bsonType: "string"
+          },
+          description: "Incidents must be stored as an array of strings"
+        }
+      }
+    }
+  }
+});
 
 // USERS
 
@@ -16,7 +130,7 @@ db.users.insertOne({
     skillLevel: "advanced",
     registeredAt: new Date("2024-01-01"),
     active: true
-})
+});
 
 db.users.insertOne({
     name: "Magdalena Philipova",
@@ -25,7 +139,7 @@ db.users.insertOne({
     skillLevel: "beginner",
     registeredAt: new Date("2023-02-15"),
     active: false
-})
+});
 
 db.users.insertOne({
     name: "Angel Motovski",
@@ -33,7 +147,7 @@ db.users.insertOne({
     skillLevel: "advanced",
     registeredAt: new Date("2020-12-25"),
     active: true
-})
+});
 
 // insert many users
 db.users.insertMany([
@@ -106,7 +220,14 @@ db.users.insertMany([
     registeredAt: new Date(),
     active: false
   },
-])
+  {
+    name: "Dimitar Stoyanov",
+    email: "mitko_stoyanov@tu-sofia.bg",
+    role: "tourist",
+    skillLevel: "advanced",
+    active: true
+  }
+]);
 
 // insert multiple users using a loop
 for (let i = 1; i <= 8; i++) {
@@ -121,6 +242,25 @@ for (let i = 1; i <= 8; i++) {
 }
 
 // LIFTS
+
+// insert one lift only
+db.lifts.insertOne({
+    name: "Alpine Express",
+    type: "chairlift",
+    capacityPerHr: 2000,
+    status: "active",
+    maintenance: []
+});
+
+db.lifts.insertOne({
+    name: "Peak energy bar",
+    type: "ski tow",
+    capacityPerHr: 800,
+    status: "active",
+    maintenance: []
+});
+
+// insert many lifts
 db.lifts.insertMany([
   {
     name: "SnowPeak Gondola",
@@ -134,11 +274,63 @@ db.lifts.insertMany([
     type: "chairlift",
     capacityPerHr: 1800,
     status: "active",
-    maintenance: []
+    maintenance: ["2025-01-15: Routine check - resolved on 2025-01-16, cost $500"]
+  },
+  {
+    name: "Summit T-Bar",
+    type: "ski tow",
+    capacityPerHr: 600,
+    status: "active",
+    maintenance: ["2025-01-03: Mechanical issue - resolved on 2025-01-10, cost $1500"]
+  },
+  {
+    name: "Glacier Lift",
+    type: "chairlift",
+    capacityPerHr: 2200,
+    status: "inactive",
+    maintenance: ["2025-01-20: Electrical issue - unresolved, estimated cost $3000"]
+  },
+  {
+    name: "Valley Gondola",
+    type: "gondola",
+    status: "inactive"
+  },
+  {
+    name: "Pine Tree T-Bar",
+    type: "ski tow",
+    capacityPerHr: 500,
+    status: "active",
   }
-])
+]);
 
 // SLOPES
+
+// insert one slope only
+db.slopes.insertOne({
+    name: "Alpine Run",
+    difficulty: "blue",
+    lengthKm: 2.5,
+    status: "open",
+    incidents: []
+});
+
+db.slopes.insertOne({
+    name: "Peak Trail",
+    difficulty: "red",
+    lengthKm: 3.5,
+    status: "open",
+    incidents: ["ski accident on 2025-01-10 - resolved, no injuries", "ski accident on 2025-01-15 - resolved, minor injuries"]
+});
+
+db.slopes.insertOne({
+    name: "Summit Slope",
+    difficulty: "black",
+    lengthKm: 2,
+    status: "closed",
+    incidents: ["avalanche on 2025-01-12 - resolved, no injuries"]
+});
+
+// insert many slopes
 db.slopes.insertMany([
   {
     name: "Glacier Run",
@@ -150,7 +342,6 @@ db.slopes.insertMany([
   {
     name: "Beginner Valley",
     difficulty: "green",
-    lengthKm: 2.1,
     status: "open",
     incidents: []
   },
@@ -158,40 +349,119 @@ db.slopes.insertMany([
     name: "Black Storm",
     difficulty: "black",
     lengthKm: 3.8,
-    status: "closed",
-    incidents: []
+    status: "closed"
+  },
+  {
+    name: "Pine Tree Trail",
+    difficulty: "blue",
+    lengthKm: 2.2,
+    status: "open",
+    incidents: ["ski accident on 2025-01-18 - resolved, minor injuries"]
+  },
+  {
+    name: "Eagle Peak",
+    difficulty: "red",
+    lengthKm: 1.5,
+    status: "closed"
   }
-])
+]);
 
-// SKIPASSES
+// SKI PASSES
+
+// set ski passes to all tourists with different types and prices based on index
 let tourists = db.users.find({ role: "tourist" }).toArray()
 
-tourists.forEach(user => {
+tourists.forEach((user, index) => {
+  let cardType;
+  let price = 60;
+  let startDate = new Date();
+  startDate.setHours(6, 30, 0, 0); // opens 8:30 (GMT+2)
+  let endDate = new Date();
+  endDate.setHours(15, 0, 0, 0); // closes 17:00 (GMT+2)
+
+  if (index % 3 === 0) {
+    cardType = "daily";
+  } 
+  else if (index % 3 === 1) {
+    cardType = "morning";
+    price = 45;
+    endDate.setHours(10, 30, 0, 0);
+  } 
+  else {
+    cardType = "afternoon";
+    price = 40;
+    startDate.setHours(10, 30, 0, 0);
+    endDate.setHours(15, 0, 0, 0);
+  }
+
+  if (index === 1) {
+    cardType = "seasonal";
+    price = 800;
+    startDate = new Date("2025-12-15");
+    endDate = new Date("2026-03-31");
+  }
+
+  if (index === 9) {
+    cardType = "night";
+    price = 40;
+    startDate.setHours(16, 0, 0, 0);
+    endDate.setHours(20, 0, 0, 0);
+  }
+
   db.skiPasses.insertOne({
     userId: user._id,
-    type: "daily",
-    price: 120,
-    validFrom: new Date("2025-01-10"),
-    validTo: new Date("2025-01-10"),
+    type: cardType,
+    price: price,
+    validFrom: startDate,
+    validTo: endDate,
     scans: []
-  })
-})
+  });
+});
+
+// set ski passes to all instructors
+let instructors = db.users.find({ role: "instructor" }).toArray()
+
+instructors.forEach(user => {
+  db.skiPasses.insertOne({
+    userId: user._id,
+    type: "seasonal",
+    price: 400,
+    validFrom: new Date("2025-12-15"),
+    validTo: new Date("2026-03-31"),
+    scans: []
+  });
+});
 
 // RESERVATIONS
-let instructor = db.users.findOne({ role: "instructor" })
-let slope = db.slopes.findOne({ difficulty: "green" })
+tourists.slice(2, 5).forEach((user, index) => {
+  let instructor = db.users.findOne({ role: "instructor" })
+  let slope = db.slopes.findOne({ difficulty: "green" })
+  let status = "confirmed"
+  let duration = 2
 
-tourists.slice(0, 5).forEach(user => {
+  if (index === 4) {
+    status = "pending"
+    instructor = db.users.findOne({ role: "instructor", name: "Georgi Dimitrov" })
+    slope = db.slopes.findOne({ difficulty: "red" })
+    duration = 3
+  }
+
+  if (index === 5) {
+    instructor = db.users.findOne({ name: "Ivaylo Stoyanov" })
+    slope = db.slopes.findOne({ name: "Alpine Run" })
+    status = "cancelled"
+  }
+
   db.reservations.insertOne({
     touristId: user._id,
     instructorId: instructor._id,
     slopeId: slope._id,
-    lessonDate: new Date("2025-01-12"),
-    durationHours: 2,
-    price: 150,
-    status: "confirmed"
+    lessonDate: new Date(),
+    durationHours: duration,
+    price: 100,
+    status: status
   })
-})
+});
 
 // MAINTENANCE REPORTS
 let technician = db.users.findOne({ role: "technician" })
@@ -201,12 +471,12 @@ db.maintenanceReports.insertMany([
   {
     liftId: lift._id,
     technicianId: technician._id,
-    date: new Date("2025-01-05"),
+    date: new Date(),
     issueType: "mechanical",
     severity: "high",
     resolved: true,
     resolutionCost: 2500
   }
-])
+]);
 
 print("Database initialized successfully.")
