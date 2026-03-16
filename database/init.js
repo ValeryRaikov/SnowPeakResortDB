@@ -6,6 +6,30 @@ db = db.getSiblingDB("SnowPeakResortDB")
 
 db.dropDatabase() // clear existing data if any
 
+const crypto = require("crypto")
+
+// validate users password (8 characters, at least one uppercase, one lowercase and one special character)
+function validatePassword(password) {
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}$/
+
+  if (!passwordRegex.test(password)) {
+    throw new Error(
+      "Password must be at least 8 characters long and contain uppercase, lowercase and special character"
+    )
+  }
+}
+
+// hash function for the users password using SHA256
+function hashPassword(password) {
+  validatePassword(password)
+
+  return crypto
+    .createHash("sha256")
+    .update(password)
+    .digest("hex")
+
+}
+
 // SCHEAM VALIDATORS
 db.createCollection("users", {
   validator: {
@@ -21,6 +45,12 @@ db.createCollection("users", {
           bsonType: "string",
           pattern: "^.+@.+\\..+$",
           description: "Must be a valid email"
+        },
+        password: {
+          bsonType: "string",
+          minLength: 64,
+          maxLength: 64,
+          description: "Password must be stored as SHA256 hash"
         },
         role: {
           enum: ["tourist", "instructor", "technician"],
@@ -126,6 +156,7 @@ db.createCollection("slopes", {
 db.users.insertOne({
     name: "Valeri Raykov",
     email: "valeryraikov@gmail.com",
+    password: hashPassword("Valeri@123"),
     role: "tourist",
     skillLevel: "advanced",
     registeredAt: new Date("2024-01-01"),
@@ -135,6 +166,7 @@ db.users.insertOne({
 db.users.insertOne({
     name: "Magdalena Philipova",
     email: "maggy.h.f@gmail.com",
+    password: hashPassword("Meggie!Fil"),
     role: "tourist",
     skillLevel: "beginner",
     registeredAt: new Date("2023-02-15"),
@@ -154,6 +186,7 @@ db.users.insertMany([
   {
     name: "Ivan Petrov",
     email: "ivanpetrov@mail.com",
+    password: hashPassword("vankataP."),
     role: "tourist",
     skillLevel: "intermediate",
     registeredAt: new Date("2024-01-15"),
@@ -162,6 +195,7 @@ db.users.insertMany([
   {
     name: "Maria Ivanova",
     email: "maria_ivanova@gmail.com",
+    password: hashPassword("MiMiI00#"),
     role: "tourist",
     skillLevel: "beginner",
     registeredAt: new Date("2024-02-01"),
@@ -170,6 +204,7 @@ db.users.insertMany([
   {
     name: "Georgi Dimitrov",
     email: "georgi123@gmail.com",
+    password: hashPassword("GOGO_d_!123"),
     role: "instructor",
     skillLevel: "expert",
     registeredAt: new Date("2023-11-01"),
@@ -178,6 +213,7 @@ db.users.insertMany([
   {
     name: "Petar Nikolov",
     email: "petar_x_nikolov@mail.com",
+    password: hashPassword("Pecata@NKLV"),
     role: "technician",
     skillLevel: null,
     registeredAt: new Date("2023-10-20"),
@@ -186,6 +222,7 @@ db.users.insertMany([
   {
     name: "Ivaylo Stoyanov",
     email: "ivo_stoyanov@abv.bg",
+    password: hashPassword("IVCHO!stoyanov"),
     role: "instructor",
     skillLevel: "expert",
     registeredAt: new Date("2021-03-03"),
@@ -194,6 +231,7 @@ db.users.insertMany([
   {
     name: "Viktoria Vasileva",
     email: "viktoriavasileva@yahoo.com",
+    password: hashPassword("Viki?VSLV"),
     role: "tourist",
     skillLevel: "intermediate",
     registeredAt: new Date(),
@@ -202,12 +240,14 @@ db.users.insertMany([
   {
     name: "Boris Leonidov",
     email: "boretoleonidov@mail.com",
+    password: hashPassword("Bore?LNDV"),
     role: "technician",
     active: false
   },
   {
     name: "Mihail Kolev",
     email: "MishoKolev@abv.bg",
+    password: hashPassword("Misho@K_123"),
     role: "technician",
     skillLevel: null,
     active: true
@@ -215,6 +255,7 @@ db.users.insertMany([
   {
     name: "Tsvetelina Petrova",
     email: "tsveti_p@mail.com",
+    password: hashPassword("Ceca.Petrova."),
     role: "tourist",
     skillLevel: "beginner",
     registeredAt: new Date(),
@@ -223,6 +264,7 @@ db.users.insertMany([
   {
     name: "Dimitar Stoyanov",
     email: "mitko_stoyanov@tu-sofia.bg",
+    password: hashPassword("Mitko?Mitko"),
     role: "tourist",
     skillLevel: "advanced",
     active: true
@@ -233,7 +275,6 @@ db.users.insertMany([
 for (let i = 1; i <= 8; i++) {
   db.users.insertOne({
     name: "Tourist " + i,
-    email: "tourist" + i + "@mail.com",
     role: "tourist",
     skillLevel: "beginner",
     registeredAt: new Date(),
@@ -433,22 +474,36 @@ instructors.forEach(user => {
 });
 
 // RESERVATIONS
-tourists.slice(2, 5).forEach((user, index) => {
+tourists.slice(0, 5).forEach((user, index) => {
   let instructor = db.users.findOne({ role: "instructor" })
   let slope = db.slopes.findOne({ difficulty: "green" })
   let status = "confirmed"
   let duration = 2
+  let price = 100
 
-  if (index === 4) {
-    status = "pending"
-    instructor = db.users.findOne({ role: "instructor", name: "Georgi Dimitrov" })
+  if (index === 1) {
+    instructor = db.users.findOne({ name: "Georgi Dimitrov" })
     slope = db.slopes.findOne({ difficulty: "red" })
     duration = 3
+    price = 140
   }
 
-  if (index === 5) {
+  if (index === 2) {
     instructor = db.users.findOne({ name: "Ivaylo Stoyanov" })
     slope = db.slopes.findOne({ name: "Alpine Run" })
+    status = "pending"
+  }
+
+  if (index === 3) {
+    instructor = db.users.findOne({ name: "Ivaylo Stoyanov" })
+    slope = db.slopes.findOne({ difficulty: "blue" })
+    duration = 1
+    price = 70
+  }
+
+  if (index === 4) {
+    instructor = db.users.findOne({ name: "Georgi Dimitrov" })
+    slope = db.slopes.findOne({ difficulty: "black" })
     status = "cancelled"
   }
 
@@ -458,25 +513,51 @@ tourists.slice(2, 5).forEach((user, index) => {
     slopeId: slope._id,
     lessonDate: new Date(),
     durationHours: duration,
-    price: 100,
+    price: price,
     status: status
   })
 });
 
 // MAINTENANCE REPORTS
 let technician = db.users.findOne({ role: "technician" })
-let lift = db.lifts.findOne()
+
+let lift1 = db.lifts.findOne({ name: "Alpine Express" })
+let lift2 = db.lifts.findOne({ name: "SnowPeak Gondola" })
+let lift3 = db.lifts.findOne({ name: "Summit T-Bar" })
 
 db.maintenanceReports.insertMany([
   {
-    liftId: lift._id,
+    liftId: lift1._id,
     technicianId: technician._id,
     date: new Date(),
     issueType: "mechanical",
     severity: "high",
     resolved: true,
     resolutionCost: 2500
+  },
+  {
+    liftId: lift2._id,
+    technicianId: technician._id,
+    date: new Date(),
+    issueType: "electrical",
+    severity: "medium",
+    resolved: true,
+    resolutionCost: 1200
+  },
+  {
+    liftId: lift3._id,
+    technicianId: technician._id,
+    date: new Date(),
+    issueType: "cable tension problem",
+    severity: "low",
+    resolved: false,
+    resolutionCost: 0
   }
 ]);
+
+// add indexs for better performance on common queries
+db.reservations.createIndex({ instructorId: 1 })
+db.reservations.createIndex({ slopeId: 1 })
+db.reservations.createIndex({ lessonDate: 1 })
 
 print("Database initialized successfully.")

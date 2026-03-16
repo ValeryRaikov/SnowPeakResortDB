@@ -1,17 +1,45 @@
-db = db.getSiblingDB("SnowPeakResortDB")
+// Connect to admin database
+db = db.getSiblingDB("admin")
 
+// Remove existing users if script is re-run
+try { db.dropUser("resortAdmin") } catch(e) {}
+try { db.dropUser("resortOperator") } catch(e) {}
+try { db.dropUser("resortViewer") } catch(e) {}
+
+// Create ADMIN user
 db.createUser({
   user: "resortAdmin",
-  pwd: "admin123",
+  pwd: "Admin@123",
   roles: [
-    { role: "readWrite", db: "snowpeakResortDB" }
+    {
+      role: "dbOwner",
+      db: "SnowPeakResortDB"
+    }
   ]
 })
 
+// Create OPERATOR user
 db.createUser({
-  user: "resortViewer",
-  pwd: "viewer123",
+  user: "resortOperator",
+  pwd: "Operator@123",
   roles: [
-    { role: "read", db: "snowpeakResortDB" }
+    {
+      role: "readWrite",
+      db: "SnowPeakResortDB"
+    }
   ]
 })
+
+// Create VIEWER user
+db.createUser({
+  user: "resortViewer",
+  pwd: "Viewer@123",
+  roles: [
+    {
+      role: "read",
+      db: "SnowPeakResortDB"
+    }
+  ]
+})
+
+print("RBAC users created successfully")
