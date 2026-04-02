@@ -1,3 +1,5 @@
+load("utils.js")
+
 db = db.getSiblingDB("SnowPeakResortDB")
 
 // CREATE (look in init.js for more)
