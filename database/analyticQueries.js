@@ -1,7 +1,5 @@
 db = db.getSiblingDB("SnowPeakResortDB")
 
-print("Running analytics queries...")
-
 // 1. Total revenue from ski passes
 db.skiPasses.aggregate([
 {
