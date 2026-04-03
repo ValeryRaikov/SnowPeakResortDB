@@ -400,6 +400,7 @@ tourists.forEach((user, index) => {
 
   if (index % 3 === 0) {
     cardType = "daily";
+    scans = ["Pine Tree T-Bar", "Peak energy bar"];
   } 
   else if (index % 3 === 1) {
     cardType = "morning";
@@ -411,6 +412,7 @@ tourists.forEach((user, index) => {
     price = 40;
     startDate.setHours(10, 30, 0, 0);
     endDate.setHours(15, 0, 0, 0);
+    scans = ["Glacier Lift"];
   }
 
   if (index === 1) {
@@ -418,6 +420,7 @@ tourists.forEach((user, index) => {
     price = 800;
     startDate = new Date("2025-12-15");
     endDate = new Date("2026-03-31");
+    scans = ["Pine Tree T-Bar", "Eagle Express", "Valley Gondola"];
   }
 
   if (index === 9) {
@@ -425,6 +428,7 @@ tourists.forEach((user, index) => {
     price = 40;
     startDate.setHours(16, 0, 0, 0);
     endDate.setHours(20, 0, 0, 0);
+    scans = ["SnowPeak Gondola"];
   }
 
   db.skiPasses.insertOne({
@@ -433,7 +437,7 @@ tourists.forEach((user, index) => {
     price: price,
     validFrom: startDate,
     validTo: endDate,
-    scans: []
+    scans
   });
 });
 
