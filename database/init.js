@@ -397,6 +397,7 @@ tourists.forEach((user, index) => {
   startDate.setHours(6, 30, 0, 0); // opens 8:30 (GMT+2)
   let endDate = new Date();
   endDate.setHours(15, 0, 0, 0); // closes 17:00 (GMT+2)
+  let scans = [];
 
   if (index % 3 === 0) {
     cardType = "daily";

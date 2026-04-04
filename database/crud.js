@@ -33,7 +33,7 @@ db.lifts.find({ capacityPerHr: { $gt: 1000 } }) // lifts with capacity greater t
 db.lifts.find({ name: { $regex: "Express", $options: "i" } }) // lifts with name containing Express
 db.lifts.find({ maintenance: { $exists: true, $not: { $size: 0 } } }, { name: 1, maintenance: 1 }) // lifts with maintenance records
 
-db.slopes.find({ difficulty: "advanced" }) // all advanced slopes
+db.slopes.find({ difficulty: "black" }) // all black slopes
 db.slopes.find({ lengthKm: { $gt: 2 } }) // slopes longer than 2 kilometers
 db.slopes.find({ name: { $regex: "Glacier", $options: "i" } }) // slopes with name containing Glacier
 db.slopes.find({ incidents: { $exists: true, $not: { $size: 0 } } }, { name: 1, incidents: 1 }) // slopes with incident records
@@ -85,8 +85,7 @@ db.lifts.updateMany(
 // update slope status and add incident
 db.slopes.updateOne(
   { name : "Alpine Run" },
-  { $set: { difficulty: "red" } },
-  { status: "closed" },
+  { $set: { difficulty: "red", status: "closed" } },
   { $push: { incidents: "Small avalanche near mid-mountain" } }
 )
 
